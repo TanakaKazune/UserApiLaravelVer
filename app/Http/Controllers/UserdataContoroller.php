@@ -99,7 +99,9 @@ class UserdataContoroller extends Controller
             unset($form['_token']);
             $userdata->fill($form)->save();
             $get = $userdata->id;
-            return ['id' => $get];
+
+            $datas = Userdata::find($id, ['name', 'age']);
+            return $datas->toArray();
         } else {
             return $this->jsonResponse(["message" => "対象のレコードが見つかりません"]);
         }
