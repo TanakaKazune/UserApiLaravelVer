@@ -39,13 +39,24 @@ class UserdataContoroller extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, Userdata::$rules);
-        $userdata = new Userdata;
-        $form = $request->all();
-        unset($form['_token']);
-        $userdata->fill($form)->save();
-        $get = $userdata->id;
-        return ['id' => $get];
+        if ($request->has(['name', 'age'])) {
+            $form['name'] = $request->input('name');
+            $form['age'] = $request->input('age');
+            
+            $userdata = new Userdata;
+            $userdata->fill($form)->save();
+            $get = $userdata->id;
+            return ['id' => $get];
+        }else{
+            return $this->jsonResponse(["message" => "error"]);
+        }
+        // $this->validate($request, Userdata::$rules);
+        // $userdata = new Userdata;
+        // $form = $request->all();
+        // unset($form['_token']);
+        // $userdata->fill($form)->save();
+        // $get = $userdata->id;
+        // return ['id' => $get];
     }
 
     /**
@@ -85,23 +96,38 @@ class UserdataContoroller extends Controller
     public function update(Request $request, $id)
     {
         if (DB::table('userdata')->where('id', $id)->exists()) {
-            $datas = Userdata::find($id, ['name', 'age']);
-            $datas = $datas->toArray();
-            if (isset($request->name)) {
-                $datas['name'] = $request->name;
+            $form = Userdata::find($id, ['name', 'age']);
+            $form = $form->toArray();
+            if ($request->has('name')) {
+                $form['name'] = $request->input('name');
             }
-            if (isset($request->age)) {
-                $datas['age'] = $request->age;
+            if ($request->has('age')) {
+                $form['age'] = $request->input('age');
             }
-
-            $userdata = Userdata::find($request->id);
-            $form = $datas;
-            unset($form['_token']);
+            
+            $userdata = Userdata::find($id);
             $userdata->fill($form)->save();
-            $get = $userdata->id;
-
+            
             $datas = Userdata::find($id, ['name', 'age']);
             return $datas->toArray();
+            
+            // $datas = Userdata::find($id, ['name', 'age']);
+            // $datas = $datas->toArray();
+            // if (isset($request->name)) {
+            //     $datas['name'] = $request->name;
+            // }
+            // if (isset($request->age)) {
+            //     $datas['age'] = $request->age;
+            // }
+
+            // $userdata = Userdata::find($request->id);
+            // $form = $datas;
+            // unset($form['_token']);
+            // $userdata->fill($form)->save();
+            // $get = $userdata->id;
+
+            // $datas = Userdata::find($id, ['name', 'age']);
+            // return $datas->toArray();
         } else {
             return $this->jsonResponse(["message" => "対象のレコードが見つかりません"]);
         }
